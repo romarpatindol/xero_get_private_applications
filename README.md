@@ -141,4 +141,33 @@ response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
 return response
 ```
 
+This same API pattern exists for the following API objects:
+
+* Accounts
+* Attachments
+* BankTransactions
+* BankTransfers
+* BrandingThemes
+* ContactGroups
+* Contacts
+* CreditNotes
+* Currencies
+* Employees
+* ExpenseClaims
+* Invoices
+* Items
+* Journals
+* ManualJournals
+* Organisation
+* Overpayments
+* Payments
+* Prepayments
+* Purchase Orders
+* Receipts
+* RepeatingInvoices
+* Reports
+* TaxRates
+* TrackingCategories
+* Users
+
 **Note:** Supercode has not been launched yet. This is for internal testing only.
