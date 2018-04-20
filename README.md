@@ -104,12 +104,12 @@ store the key value as a constant, remember two things:
 Complex filters can be constructed, for example retrieving invoices for a contact:
 
 ```python
->>> xero.invoices.filter(Contact_ContactID='83ad77d8-48a7-4f77-9146-e6933b7fb63b')
+>>> query = "invoices.filter(Contact_ContactID='83ad77d8-48a7-4f77-9146-e6933b7fb63b')"
 ```
 
 Filters which aren't supported by this API can also be constructed using 'raw' mode like this:
 ```python
->>> xero.invoices.filter(raw='AmountDue > 0')
+>>> query = "invoices.filter(raw='AmountDue > 0')"
 ```
 
 Be careful when dealing with large amounts of data, the Xero API will take an
@@ -118,27 +118,14 @@ return more than 100 results, you should make use of the ``page`` parameter::
 
 ```python
 # Grab 100 invoices created after 01-01-2013
->>> xero.invoices.filter(since=datetime(2013, 1, 1), page=1)
+>>> query = "invoices.filter(since=datetime(2013, 1, 1), page=1)"
 ```
 
 You can also order the results to be returned::
 
 ```python
 # Grab contacts ordered by EmailAddress
->>> xero.contacts.filter(order='EmailAddress DESC')
-```
-
-For invoices (and other objects that can be retrieved as PDFs), accessing the PDF is done
-via setting the Accept header:
-
-```python
-# Fetch a PDF
-invoice = xero.invoices.get('af722e93-b64f-482d-9955-1b027bfec896', \
-    headers={'Accept': 'application/pdf'})
-# Stream the PDF to the user (Django specific example)
-response = HttpResponse(invoice, content_type='application/pdf')
-response['Content-Disposition'] = 'attachment; filename="invoice.pdf"'
-return response
+>>> query = "contacts.filter(order='EmailAddress DESC')"
 ```
 
 This same API pattern exists for the following API objects:
