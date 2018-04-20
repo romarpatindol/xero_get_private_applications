@@ -4,42 +4,23 @@
 
 from __future__ import absolute_import, division, print_function
 
-import warnings
-
-from cryptography import utils
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.asymmetric.utils import Prehashed
+import six
 
 
-def _calculate_digest_and_algorithm(backend, data, algorithm):
-    if not isinstance(algorithm, Prehashed):
-        hash_ctx = hashes.Hash(algorithm, backend)
-        hash_ctx.update(data)
-        data = hash_ctx.finalize()
-    else:
-        algorithm = algorithm._algorithm
+def _truncate_digest(digest, order_bits):
+    digest_len = len(digest)
 
-    if len(data) != algorithm.digest_size:
-        raise ValueError(
-            "The provided data must be the same length as the hash "
-            "algorithm's digest size."
-        )
+    if 8 * digest_len > order_bits:
+        digest_len = (order_bits + 7) // 8
+        digest = digest[:digest_len]
 
-    return (data, algorithm)
+    if 8 * digest_len > order_bits:
+        rshift = 8 - (order_bits & 0x7)
+        assert 0 < rshift < 8
 
+        mask = 0xFF >> rshift << rshift
 
-def _check_not_prehashed(signature_algorithm):
-    if isinstance(signature_algorithm, Prehashed):
-        raise TypeError(
-            "Prehashed is only supported in the sign and verify methods. "
-            "It cannot be used with signer or verifier."
-        )
+        # Set the bottom rshift bits to 0
+        digest = digest[:-1] + six.int2byte(six.indexbytes(digest, -1) & mask)
 
-
-def _warn_sign_verify_deprecated():
-    warnings.warn(
-        "signer and verifier have been deprecated. Please use sign "
-        "and verify instead.",
-        utils.PersistentlyDeprecated,
-        stacklevel=3
-    )
+    return digest

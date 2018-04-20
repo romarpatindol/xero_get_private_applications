@@ -11,10 +11,6 @@ import six
 from cryptography import utils
 
 
-def generate_parameters(generator, key_size, backend):
-    return backend.generate_dh_parameters(generator, key_size)
-
-
 class DHPrivateNumbers(object):
     def __init__(self, x, public_numbers):
         if not isinstance(x, six.integer_types):
@@ -38,9 +34,6 @@ class DHPrivateNumbers(object):
 
     def __ne__(self, other):
         return not self == other
-
-    def private_key(self, backend):
-        return backend.load_dh_private_numbers(self)
 
     public_numbers = utils.read_only_property("_public_numbers")
     x = utils.read_only_property("_x")
@@ -70,29 +63,20 @@ class DHPublicNumbers(object):
     def __ne__(self, other):
         return not self == other
 
-    def public_key(self, backend):
-        return backend.load_dh_public_numbers(self)
-
     y = utils.read_only_property("_y")
     parameter_numbers = utils.read_only_property("_parameter_numbers")
 
 
 class DHParameterNumbers(object):
-    def __init__(self, p, g, q=None):
+    def __init__(self, p, g):
         if (
             not isinstance(p, six.integer_types) or
             not isinstance(g, six.integer_types)
         ):
             raise TypeError("p and g must be integers")
-        if q is not None and not isinstance(q, six.integer_types):
-            raise TypeError("q must be integer or None")
-
-        if g < 2:
-            raise ValueError("DH generator must be 2 or greater")
 
         self._p = p
         self._g = g
-        self._q = q
 
     def __eq__(self, other):
         if not isinstance(other, DHParameterNumbers):
@@ -100,19 +84,14 @@ class DHParameterNumbers(object):
 
         return (
             self._p == other._p and
-            self._g == other._g and
-            self._q == other._q
+            self._g == other._g
         )
 
     def __ne__(self, other):
         return not self == other
 
-    def parameters(self, backend):
-        return backend.load_dh_parameter_numbers(self)
-
     p = utils.read_only_property("_p")
     g = utils.read_only_property("_g")
-    q = utils.read_only_property("_q")
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -123,20 +102,14 @@ class DHParameters(object):
         Generates and returns a DHPrivateKey.
         """
 
-    @abc.abstractmethod
-    def parameter_bytes(self, encoding, format):
-        """
-        Returns the parameters serialized as bytes.
-        """
 
+@six.add_metaclass(abc.ABCMeta)
+class DHParametersWithSerialization(DHParameters):
     @abc.abstractmethod
     def parameter_numbers(self):
         """
         Returns a DHParameterNumbers.
         """
-
-
-DHParametersWithSerialization = DHParameters
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -159,13 +132,6 @@ class DHPrivateKey(object):
         The DHParameters object associated with this private key.
         """
 
-    @abc.abstractmethod
-    def exchange(self, peer_public_key):
-        """
-        Given peer's DHPublicKey, carry out the key exchange and
-        return shared key as bytes.
-        """
-
 
 @six.add_metaclass(abc.ABCMeta)
 class DHPrivateKeyWithSerialization(DHPrivateKey):
@@ -173,12 +139,6 @@ class DHPrivateKeyWithSerialization(DHPrivateKey):
     def private_numbers(self):
         """
         Returns a DHPrivateNumbers.
-        """
-
-    @abc.abstractmethod
-    def private_bytes(self, encoding, format, encryption_algorithm):
-        """
-        Returns the key serialized as bytes.
         """
 
 
@@ -196,17 +156,11 @@ class DHPublicKey(object):
         The DHParameters object associated with this public key.
         """
 
+
+@six.add_metaclass(abc.ABCMeta)
+class DHPublicKeyWithSerialization(DHPublicKey):
     @abc.abstractmethod
     def public_numbers(self):
         """
         Returns a DHPublicNumbers.
         """
-
-    @abc.abstractmethod
-    def public_bytes(self, encoding, format):
-        """
-        Returns the key serialized as bytes.
-        """
-
-
-DHPublicKeyWithSerialization = DHPublicKey

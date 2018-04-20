@@ -19,15 +19,14 @@ from cryptography.hazmat.primitives.twofactor.utils import _generate_uri
 
 
 class HOTP(object):
-    def __init__(self, key, length, algorithm, backend,
-                 enforce_key_length=True):
+    def __init__(self, key, length, algorithm, backend):
         if not isinstance(backend, HMACBackend):
             raise UnsupportedAlgorithm(
                 "Backend object does not implement HMACBackend.",
                 _Reasons.BACKEND_MISSING_INTERFACE
             )
 
-        if len(key) < 16 and enforce_key_length is True:
+        if len(key) < 16:
             raise ValueError("Key length has to be at least 128 bits.")
 
         if not isinstance(length, six.integer_types):

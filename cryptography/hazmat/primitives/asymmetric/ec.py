@@ -22,7 +22,7 @@ class EllipticCurve(object):
     @abc.abstractproperty
     def key_size(self):
         """
-        Bit size of a secret scalar for the curve.
+        The bit length of the base point of the curve.
         """
 
 
@@ -62,18 +62,6 @@ class EllipticCurvePrivateKey(object):
         The EllipticCurve that this key is on.
         """
 
-    @abc.abstractproperty
-    def key_size(self):
-        """
-        Bit size of a secret scalar for the curve.
-        """
-
-    @abc.abstractproperty
-    def sign(self, data, signature_algorithm):
-        """
-        Signs the data
-        """
-
 
 @six.add_metaclass(abc.ABCMeta)
 class EllipticCurvePrivateKeyWithSerialization(EllipticCurvePrivateKey):
@@ -104,12 +92,6 @@ class EllipticCurvePublicKey(object):
         The EllipticCurve that this key is on.
         """
 
-    @abc.abstractproperty
-    def key_size(self):
-        """
-        Bit size of a secret scalar for the curve.
-        """
-
     @abc.abstractmethod
     def public_numbers(self):
         """
@@ -120,12 +102,6 @@ class EllipticCurvePublicKey(object):
     def public_bytes(self, encoding, format):
         """
         Returns the key serialized as bytes.
-        """
-
-    @abc.abstractmethod
-    def verify(self, signature, data, signature_algorithm):
-        """
-        Verifies the signature of the data.
         """
 
 
@@ -228,24 +204,6 @@ class SECP192R1(object):
     key_size = 192
 
 
-@utils.register_interface(EllipticCurve)
-class BrainpoolP256R1(object):
-    name = "brainpoolP256r1"
-    key_size = 256
-
-
-@utils.register_interface(EllipticCurve)
-class BrainpoolP384R1(object):
-    name = "brainpoolP384r1"
-    key_size = 384
-
-
-@utils.register_interface(EllipticCurve)
-class BrainpoolP512R1(object):
-    name = "brainpoolP512r1"
-    key_size = 512
-
-
 _CURVE_TYPES = {
     "prime192v1": SECP192R1,
     "prime256v1": SECP256R1,
@@ -268,10 +226,6 @@ _CURVE_TYPES = {
     "sect283r1": SECT283R1,
     "sect409r1": SECT409R1,
     "sect571r1": SECT571R1,
-
-    "brainpoolP256r1": BrainpoolP256R1,
-    "brainpoolP384r1": BrainpoolP384R1,
-    "brainpoolP512r1": BrainpoolP512R1,
 }
 
 
@@ -285,19 +239,6 @@ class ECDSA(object):
 
 def generate_private_key(curve, backend):
     return backend.generate_elliptic_curve_private_key(curve)
-
-
-def derive_private_key(private_value, curve, backend):
-    if not isinstance(private_value, six.integer_types):
-        raise TypeError("private_value must be an integer type.")
-
-    if private_value <= 0:
-        raise ValueError("private_value must be a positive integer.")
-
-    if not isinstance(curve, EllipticCurve):
-        raise TypeError("curve must provide the EllipticCurve interface.")
-
-    return backend.derive_elliptic_curve_private_key(private_value, curve)
 
 
 class EllipticCurvePublicNumbers(object):
@@ -361,9 +302,6 @@ class EllipticCurvePublicNumbers(object):
     def __ne__(self, other):
         return not self == other
 
-    def __hash__(self):
-        return hash((self.x, self.y, self.curve.name, self.curve.key_size))
-
     def __repr__(self):
         return (
             "<EllipticCurvePublicNumbers(curve={0.curve.name}, x={0.x}, "
@@ -402,9 +340,6 @@ class EllipticCurvePrivateNumbers(object):
 
     def __ne__(self, other):
         return not self == other
-
-    def __hash__(self):
-        return hash((self.private_value, self.public_numbers))
 
 
 class ECDH(object):
