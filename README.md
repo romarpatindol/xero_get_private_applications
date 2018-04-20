@@ -1,7 +1,6 @@
 # Xero Accounting GET API for Private Applications
 
-A [Supercode](http://gosupercode.com) function that update values multiple request in one call google spreadsheet.
-Still developing for other methods of google spreadsheet api.
+A [Supercode](http://gosupercode.com) function that connects to Xero Accounting Get API for Private Applications
 
 ## Server Usage
 
