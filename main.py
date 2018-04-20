@@ -11,7 +11,7 @@ def myconverter(o):
 def main(consumer_key, rsa_key, query):
     credentials = PrivateCredentials(consumer_key, rsa_key)
     xero = Xero(credentials)
-    xero_data = eval("xero." + query)
+    xero_data = xero.contacts.all()
 
     response = {
         "data": xero_data
